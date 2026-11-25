@@ -1,0 +1,201 @@
+notes so for now we are using a placeholder thing
+
+const newExpense = {
+	id: Date.now(),
+	title: title.trim(),
+	amount: nuericAmount,
+}
+
+so we need to make this feel more commercial, so we can filter later 
+by category, to do totals, display dates, and etc.
+
+so we make a couple new fields:
+
+category = the tags, 'food', 'rent', etc
+
+date = timestamp/calendar date... maybe we use the same as godot with a
+utc code?
+
+so we use const [category, setCategory] = useState('food') as an example
+
+a piece of the app holds the dropdown choice food and updates the ui
+update when changed, its like godot OptionButton thing
+
+<select> and the <option>
+
+
+so we can make select a dropdown menu box
+each option can be a choice inside that dropdown
+
+those boxes in React is controlled by pairing value={category} what the menu
+shows with onChange={(e) => setCategory(e.target.value)}
+this lets us update the state whenever the user picks a different option
+
+new Date() and .toISOString().slice(0,10)
+
+new Date () means we can create a time based on the time from the system
+
+.toISOString() convert the time to a string so we can read it easy
+
+.slice(0, 10) means we can just use the first 10 chracterss of the string, which is good for calendars and that kinda stuff
+
+to make things more capatible like backwards compat we can use expense.category || 'Other'
+
+so this way if there is not a category it gets picked up and added anyways just in a 'kitchen drawer' thing 
+
+
+okay... so piece by piece how do we do this...
+
+we add the category next to titele and amount 
+
+then we need to update newExpense which we have already written to include category and date. which then rounds out our "expense dictionary item" kinda thing
+
+then we add the <select> dropdown inside the <form> right after amount
+... little confused on how to do it.
+
+then we can how the category and date on each <li> inside .map()
+(remmeber how making the maps work..)
+
+okay so lets write in the visual stuido thing. it will probably help me by autocompleting parts when i hit tab... so i can look at that, see how it works and then make a deciison about how to apporach it. continuing on after making these changes... it wasnt too bad but the whole category thing in the amount section i need to learn a bit better
+
+<-- fixing the starting budget -->
+
+new terms and things to consider...
+
+boolean state (i know bool from godot)
+const [isEditingBudget, setisEditingBudget] = useState(false)
+
+so we can set a toggle switch for off like a true/false
+
+bascially like var is_editing_budget: bool = false
+
+so we can do a draft/input state thing
+const [budgetInput, setBudgetInput] = useState('')
+
+so its like a scratchpad for whatever the user is typing in the the budget edit box before they hit save. 
+
+ternary operator (gotta learn about this way but its like a fork in the road)
+condition ? doThisIfTrue: doThisIfFase
+
+so if editing is on do this, otherwise do this instead
+
+then we need guard rails
+
+const parsed = parseFloat(budgetInput); if (isNaN(parsed) || parsed < 0) return
+)
+
+parseFloat(budgetInput) = read the text typed and convert to float or like decimal, im not sure if we have to use it to two places.. setTwo or something, gotta look that up
+
+isNaN(parsed) is like saying Not-A_number so it doesnt work
+
+parsed < 0 is again like asking if it negative, because if it is, we want to not have that be our budget
+
+return ofcourse like godot means stop there and return and dont take it further
+
+so to add it in we add two new states next to the useState hooks 
+the bool and the check state thing for typing
+
+then we can use a helper for the boolean to handle delete expense
+
+handleStartEditBudget converts the budget number into a text and and we can sort it with useeffect and all that i think...
+
+so we update the header to reflect changes in how we process the budgetting stuff
+
+again we can use type="button" because it wil lunderstand that like anything else. 
+
+soooo lets try to add it in the vs code and see if it works..
+
+<-- filtering expenses / calcs -->
+
+we can use a filter state const [selectedCtegory, setSelectedCategory] = useState('All')
+
+this is the part that reemember which category filter is active starting with all 
+
+like any sort sort of filter but this is a good way to do it in react
+
+derervied state/computed array
+
+const visibleExpenses = alll of the things
+
+its a variable that can render from existing states. like expenses and select category instead of being a whole new useState. we do this BC if expenses changes or category changes it can get out of sync, so this locks it all together (gotta remember this for the the future for sure)
+
+.filter on an array []
+
+so it goes through every item and builds a new array only containing the items that pass the boolean (t/f) kinda like how we can search for certain things in godoot by iterating through any arroay item[array] = x
+
+const visibleExpenses =
+  selectedCategory === 'All'
+    ? expenses
+    : expenses.filter((expense) => (expense.category || 'Other') === selectedCategory)
+
+so we can see everything initially thne we sort by teype of expense and other and boom there you go, not too bad
+
+
+we can also group totals with .reduce()
+to add up to a single number like a total
+grabbing this from a website but the vs code probably has an autocomplete
+
+const totalsByCategory = expenses.reduce((totals, expense) => {
+  const cat = expense.category || 'Other'
+  totals[cat] = (totals[cat] || 0) + expense.amount
+  return totals
+}, {})
+
+so we can reduce it to one number its not too bad. gotta learn a bit of the syntax though because im guessing the whole thing goes into the first bracket {} and the second one {} is a placeholder for the first number that pops out to front? maybe the return totals itself. gotta read up on that more
+
+also we can use Object.entries(totalsbyCategory) converts all the stuff into a custom resource i guess orlike a array / dictionary holding all the data so that .map can read it. i gotta learn how it works exactly but basically its like .str_to_var or something like that in godot maybe actually the opposite .var_to_str to make it easier to read
+
+<-- Components, props, callbacks. i guess?? -->
+
+components are like nodes function(header) its basically UI buidling blocks
+
+bsically we got the root then we make little nodes underneath. visuallize with godot if it helps. 
+
+props = property passed down like parent -> kid sitaution
+maybe think about it when we make a class_name in godot and it takes over the parent node and changes it up a bit. oh its always downward never upward (yepp)
+
+callback prop so passing a fucntion down to the kid so if a button is clicked/signal gets responded to it calls back up to the logic of the app
+
+man okay so we need to make a components folder. 
+
+so component splitting is huge. its just like making components in godot. we make it into its own thing and just toss it in whenver we need. like plug and play skeletons for whatever we need. 
+
+<-- Extracting -->
+
+so we are bascailly going to make a ton of different components, expense forms all of it. 
+
+the difference is that components in react are usually just to describe what gets put on the screen like UI stuff
+
+so if we want to reuse stuff we need to be a ltitle careful to do it. 
+
+so if something here has a certain job then separate it otherwise 
+
+so if its just two lines then its fine to not split. 
+
+so what we can do since i wrote all of the data in the main app.jsx we can just copy paste that into a new compoennt, then import it back in at the top of the app.jsx and then plug it in. so like my filter i just take everything in <div className="filter-bar">... </div> and put it in a new file. then import it back. this way if something is wrong with a component I can figure it out there instead of looking at the code en masse. 
+
+
+so we have a huge list of different like expenses so we can make a new component thats just that list and import it into the form and the filter components. its kinda cool. this way if we ever need to change the cateogiries we can do it there and see it reflected everywhere else. 
+
+this is the same as godot single source of truth
+
+then we can use the .map() function thing inside the jsx to generate tags like options. so this is pretty fast. it is also going to be fast because the autocomplete in vs code. 
+
+<-- Implementing a share code like you would in old video games -->
+
+in old games before we could use save data we would put in a code to get us to a certain point in those 
+games again and that code would bring our items etc with them. anyone could use it. it was easy. so for us we can do somethign similar i think. 
+
+we would kinda do it like we do in godot JSON.stringify. however there is something abotu using base64 and ASCII coding which I need to look into more. this is not encryption, anyone can decode it easy if they tried which is kinda the point of a shareable code
+
+so we need a confirmation to reset data/wipe data
+
+-window.confirm(Do ya wnat to do this yo)
+
+then we need helper functions to generate the code. load it. reset it. we can all buttons for all of that. lets try using a <textarea and see how it goes.
+
+so we went ahead and made the save functions a component as well. then we rewired things. 
+
+found out we can make utilities like currency formatting and that went well. it looks better overall. 
+
+so yeah we generate the code and its basically plug and play.  
